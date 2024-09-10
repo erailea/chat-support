@@ -21,7 +21,7 @@ namespace ChatSupport.Models
 
         public double GetCapacity()
         {
-            return AgentSeniorityManager.GetCapacity(this.Seniority, IsOverFlowAgent);
+            return AgentSeniorityHelper.GetCapacity(this.Seniority, IsOverFlowAgent);
         }
     }
 }

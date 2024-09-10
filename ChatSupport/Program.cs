@@ -97,6 +97,7 @@ namespace ChatSupport
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddScoped<IAgentChatCoordinatorService, AgentChatCoordinatorService>();
             builder.Services.AddScoped<SeedService>();
+            builder.Services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
             SeedData(builder);
 

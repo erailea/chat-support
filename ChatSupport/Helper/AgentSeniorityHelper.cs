@@ -2,7 +2,7 @@ using ChatSupport.Models;
 
 namespace ChatSupport.Helper
 {
-    public static class AgentSeniorityManager
+    public static class AgentSeniorityHelper
     {
         private const int MaxConcurrency = 10;
 

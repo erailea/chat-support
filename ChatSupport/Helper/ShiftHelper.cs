@@ -2,9 +2,9 @@ namespace ChatSupport.Models
 {
     public static class ShiftHelper
     {
-        public static bool IsInShift(AgentShift shift)
+        public static bool IsInShift(AgentShift shift, DateTime dateTime)
         {
-            var hour = DateTime.Now.Hour;
+            var hour = dateTime.Hour;
             switch (shift)
             {
                 case AgentShift.Morning:
@@ -14,7 +14,7 @@ namespace ChatSupport.Models
                 case AgentShift.Night:
                     return hour >= 18;
                 default:
-                    return false;
+                    throw new ArgumentOutOfRangeException(nameof(shift), shift, null);
             }
         }
     }

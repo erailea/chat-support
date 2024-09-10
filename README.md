@@ -42,6 +42,6 @@ dotnet test --settings tests.runsettings
 2. **Generate Code Coverage Report**
 
     ```bash
-reportgenerator -reports:"ChatSupport.Tests/TestResults/3fa9ed6d-d098-4047-bf48-35d11dcbfbe1/coverage.cobertura.xml"     -targetdir:"coverage"   -reporttypes:Html
+reportgenerator -reports:"ChatSupport.Tests/TestResults/67cf9a54-2ad1-4303-bfa4-460bd7eb182c/coverage.cobertura.xml"     -targetdir:"coverage"   -reporttypes:Html
     ```
 

@@ -6,7 +6,7 @@
         <Configuration>
           <Format>cobertura,opencover</Format>
           <Exclude>[*.Tests?]*</Exclude>
-          <ExcludeByFile>**/SeedService.cs,</ExcludeByFile>
+          <ExcludeByFile>**/SeedService.cs,**/Services/DateTimeProvider.cs</ExcludeByFile>
           <SkipAutoProps>true</SkipAutoProps>
         </Configuration>
       </DataCollector>
