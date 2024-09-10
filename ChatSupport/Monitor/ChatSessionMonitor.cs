@@ -17,7 +17,7 @@ public class ChatSessionMonitor
 
     public async Task MonitorChatSessions()
     {
-        var chatSessions = await _chatSessionRepository.GetAllAsync(x => x.Status == ChatSessionStatus.Pending);
+        var chatSessions = _chatSessionRepository.GetAll(x => x.Status == ChatSessionStatus.Pending);
         foreach (var session in chatSessions)
         {
             session.MissedPolls += 1;
@@ -26,7 +26,7 @@ public class ChatSessionMonitor
             {
                 session.Status = ChatSessionStatus.InActive;
             }
-            
+
             await _chatSessionRepository.UpdateAsync(session.Id, session);
         }
     }

@@ -48,7 +48,7 @@ namespace ChatSupport.Queue
 
             _logger.LogInformation("Received session: {0}", sessionId);
 
-            var session = await _chatSessionRepository.GetByIdAsync(sessionId);
+            var session = _chatSessionRepository.GetById(sessionId);
 
             if (session.Status == ChatSessionStatus.InActive)
             {
@@ -76,7 +76,7 @@ namespace ChatSupport.Queue
                 return;
             }
 
-            var agent = await _agentRepository.GetByIdAsync(agentId.Value);
+            var agent = _agentRepository.GetById(agentId.Value);
             agent.ActiveSessionId = sessionId.ToString();
             await _agentRepository.UpdateAsync(agentId.Value, agent);
 

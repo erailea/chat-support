@@ -48,7 +48,7 @@ namespace ChatSupport.Services
 
         public async Task CompleteChatSessionAsync(ObjectId chatSessionId)
         {
-            var chatSessionModel = await _chatSessionRepository.GetByIdAsync(chatSessionId);
+            var chatSessionModel = _chatSessionRepository.GetById(chatSessionId);
 
             chatSessionModel.Status = ChatSessionStatus.Completed;
             chatSessionModel.CompletedAt = DateTime.UtcNow;
@@ -61,7 +61,7 @@ namespace ChatSupport.Services
 
         public async Task PollChatSessionAsync(ObjectId chatSessionId)
         {
-            var chatSession = await _chatSessionRepository.GetByIdAsync(chatSessionId);
+            var chatSession = _chatSessionRepository.GetById(chatSessionId);
             if (chatSession == null || chatSession.Status != ChatSessionStatus.Pending)
             {
                 _logger.LogWarning($"Pending chat session not found: {chatSessionId}");
@@ -74,7 +74,7 @@ namespace ChatSupport.Services
 
         public async Task SendChatMessageAsync(ChatMessage message)
         {
-            var chatSession = await _chatSessionRepository.GetByIdAsync(new ObjectId(message.ChatSessionId));
+            var chatSession = _chatSessionRepository.GetById(new ObjectId(message.ChatSessionId));
             if (chatSession == null || chatSession.Status != ChatSessionStatus.InProgress)
             {
                 _logger.LogWarning($"Active chat session not found: {message.ChatSessionId}");
@@ -87,13 +87,13 @@ namespace ChatSupport.Services
 
         public async Task SendAgentChatMessageAsync(ChatAgentMessage message)
         {
-            var agent = await _agentRepository.GetByIdAsync(new ObjectId(message.AgentId));
+            var agent = _agentRepository.GetById(new ObjectId(message.AgentId));
             if (agent == null || !agent.IsOnline || agent.ActiveSessionId == null)
             {
                 _logger.LogWarning($"Agent not found or offline: {message.AgentId}");
                 return;
             }
-            var session = await _chatSessionRepository.GetByIdAsync(new ObjectId(agent.ActiveSessionId));
+            var session = _chatSessionRepository.GetById(new ObjectId(agent.ActiveSessionId));
             if (session == null)
             {
                 _logger.LogWarning("Agent session not found: " + agent.ActiveSessionId);

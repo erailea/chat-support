@@ -23,7 +23,7 @@ namespace ChatSupport.Services
 
         public async Task<ObjectId?> GetAvailableAgent()
         {
-            var agents = await _agentRepository.GetAllAsync();
+            var agents = _agentRepository.GetAll();
             var onlineAgents = agents.Where(x => x.IsOnline).ToList();
 
             var agentCapacities = onlineAgents.ToDictionary(agent => agent.Id, agent => agent.GetCapacity());

@@ -62,7 +62,7 @@ public class RabbitMqServiceTests
         var sessionId = MongoDB.Bson.ObjectId.GenerateNewId();
         var deliveryEventArgs = new BasicDeliverEventArgs { Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };
 
-        _mockChatSessionRepository.Setup(r => r.GetByIdAsync(sessionId)).ReturnsAsync(new ChatSession { Status = ChatSessionStatus.InActive });
+        _mockChatSessionRepository.Setup(r => r.GetById(sessionId)).Returns(new ChatSession { Status = ChatSessionStatus.InActive });
 
         // Act
         await _service.HandleRecievedSessionQueueMessage(deliveryEventArgs);
@@ -84,7 +84,7 @@ public class RabbitMqServiceTests
         var sessionId = MongoDB.Bson.ObjectId.GenerateNewId();
         var deliveryEventArgs = new BasicDeliverEventArgs { Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };
 
-        _mockChatSessionRepository.Setup(r => r.GetByIdAsync(sessionId)).ReturnsAsync(new ChatSession { Status = ChatSessionStatus.Completed });
+        _mockChatSessionRepository.Setup(r => r.GetById(sessionId)).Returns(new ChatSession { Status = ChatSessionStatus.Completed });
 
         // Act
         await _service.HandleRecievedSessionQueueMessage(deliveryEventArgs);
@@ -106,7 +106,7 @@ public class RabbitMqServiceTests
         var sessionId = MongoDB.Bson.ObjectId.GenerateNewId();
         var deliveryEventArgs = new BasicDeliverEventArgs { Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };
 
-        _mockChatSessionRepository.Setup(r => r.GetByIdAsync(sessionId)).ReturnsAsync(new ChatSession { Status = ChatSessionStatus.InProgress });
+        _mockChatSessionRepository.Setup(r => r.GetById(sessionId)).Returns(new ChatSession { Status = ChatSessionStatus.InProgress });
 
         // Act
         await _service.HandleRecievedSessionQueueMessage(deliveryEventArgs);
@@ -129,9 +129,9 @@ public class RabbitMqServiceTests
         var deliveryEventArgs = new BasicDeliverEventArgs { Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };
         var availableAgentId = MongoDB.Bson.ObjectId.GenerateNewId();
 
-        _mockChatSessionRepository.Setup(r => r.GetByIdAsync(sessionId)).ReturnsAsync(new ChatSession { Status = ChatSessionStatus.Pending });
+        _mockChatSessionRepository.Setup(r => r.GetById(sessionId)).Returns(new ChatSession { Status = ChatSessionStatus.Pending });
         _mockAgentChatCoordinatorService.Setup(s => s.GetAvailableAgent()).ReturnsAsync(availableAgentId);
-        _mockAgentRepository.Setup(r => r.GetByIdAsync(availableAgentId)).ReturnsAsync(new Agent());
+        _mockAgentRepository.Setup(r => r.GetById(availableAgentId)).Returns(new Agent());
 
         // Act
         await _service.HandleRecievedSessionQueueMessage(deliveryEventArgs);

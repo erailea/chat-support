@@ -24,8 +24,8 @@ public class ChatSessionMonitorTests
     public async Task MonitorChatSessions_WhenNoPendingSessions_DoesNotUpdateAnySession()
     {
         // Arrange
-        _chatSessionRepositoryMock.Setup(repo => repo.GetAllAsync(It.IsAny<Expression<Func<ChatSession, bool>>>()))
-            .ReturnsAsync(new List<ChatSession>());
+        _chatSessionRepositoryMock.Setup(repo => repo.GetAll(It.IsAny<Expression<Func<ChatSession, bool>>>()))
+            .Returns(new List<ChatSession>());
 
         // Act
         await _chatSessionMonitor.MonitorChatSessions();
@@ -42,8 +42,8 @@ public class ChatSessionMonitorTests
         var session2 = new ChatSession { Id = ObjectId.GenerateNewId(), Status = ChatSessionStatus.Pending, MissedPolls = 2 };
         var chatSessions = new List<ChatSession> { session1, session2 };
 
-        _chatSessionRepositoryMock.Setup(repo => repo.GetAllAsync(It.IsAny<Expression<Func<ChatSession, bool>>>()))
-            .ReturnsAsync(chatSessions);
+        _chatSessionRepositoryMock.Setup(repo => repo.GetAll(It.IsAny<Expression<Func<ChatSession, bool>>>()))
+            .Returns(chatSessions);
 
         // Act
         await _chatSessionMonitor.MonitorChatSessions();
@@ -60,8 +60,8 @@ public class ChatSessionMonitorTests
     {
         // Arrange
         var session = new ChatSession { Id = ObjectId.GenerateNewId(), Status = ChatSessionStatus.Pending, MissedPolls = 3 };
-        _chatSessionRepositoryMock.Setup(repo => repo.GetAllAsync(It.IsAny<Expression<Func<ChatSession, bool>>>()))
-            .ReturnsAsync(new List<ChatSession> { session });
+        _chatSessionRepositoryMock.Setup(repo => repo.GetAll(It.IsAny<Expression<Func<ChatSession, bool>>>()))
+            .Returns(new List<ChatSession> { session });
 
         // Act
         await _chatSessionMonitor.MonitorChatSessions();
@@ -76,8 +76,8 @@ public class ChatSessionMonitorTests
     {
         // Arrange
         var session = new ChatSession { Id = ObjectId.GenerateNewId(), Status = ChatSessionStatus.Pending, MissedPolls = 2 };
-        _chatSessionRepositoryMock.Setup(repo => repo.GetAllAsync(It.IsAny<Expression<Func<ChatSession, bool>>>()))
-            .ReturnsAsync(new List<ChatSession> { session });
+        _chatSessionRepositoryMock.Setup(repo => repo.GetAll(It.IsAny<Expression<Func<ChatSession, bool>>>()))
+            .Returns(new List<ChatSession> { session });
 
         // Act
         await _chatSessionMonitor.MonitorChatSessions();

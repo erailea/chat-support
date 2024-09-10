@@ -5,9 +5,9 @@ namespace ChatSupport.Data
 {
     public interface IMongoRepository<T> where T : class
     {
-        Task<IList<T>> GetAllAsync();
-        Task<T> GetByIdAsync(ObjectId id);
-        Task<IList<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
+        IList<T> GetAll();
+        T GetById(ObjectId id);
+        IList<T> GetAll(Expression<Func<T, bool>> predicate);
         T Get(Expression<Func<T, bool>> predicate);
         Task<bool> ExistsAsync(ObjectId id);
         Task<T> AddAsync(T entity);

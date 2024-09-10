@@ -63,8 +63,8 @@ public class ChatServiceTests
         var chatSessionId = ObjectId.GenerateNewId();
         var chatSession = new ChatSession { Id = chatSessionId, Status = ChatSessionStatus.Pending };
 
-        _mockChatSessionRepository.Setup(repo => repo.GetByIdAsync(chatSessionId))
-            .ReturnsAsync(chatSession);
+        _mockChatSessionRepository.Setup(repo => repo.GetById(chatSessionId))
+            .Returns(chatSession);
 
         // Act
         await _chatService.CompleteChatSessionAsync(chatSessionId);
@@ -83,8 +83,8 @@ public class ChatServiceTests
         var chatSessionId = ObjectId.GenerateNewId();
         var chatSession = new ChatSession { Id = chatSessionId, Status = ChatSessionStatus.Pending, MissedPolls = 5 };
 
-        _mockChatSessionRepository.Setup(repo => repo.GetByIdAsync(chatSessionId))
-            .ReturnsAsync(chatSession);
+        _mockChatSessionRepository.Setup(repo => repo.GetById(chatSessionId))
+            .Returns(chatSession);
 
         // Act
         await _chatService.PollChatSessionAsync(chatSessionId);
@@ -102,8 +102,8 @@ public class ChatServiceTests
         var message = new ChatMessage { ChatSessionId = chatSessionId.ToString(), Message = "Hello" };
         var chatSession = new ChatSession { Id = chatSessionId, Status = ChatSessionStatus.InProgress };
 
-        _mockChatSessionRepository.Setup(repo => repo.GetByIdAsync(chatSessionId))
-            .ReturnsAsync(chatSession);
+        _mockChatSessionRepository.Setup(repo => repo.GetById(chatSessionId))
+            .Returns(chatSession);
 
         // Act
         await _chatService.SendChatMessageAsync(message);
@@ -122,8 +122,8 @@ public class ChatServiceTests
         var sessionId = new ObjectId(agent.ActiveSessionId);
         var session = new ChatSession { Id = sessionId, Status = ChatSessionStatus.InProgress };
 
-        _mockAgentRepository.Setup(repo => repo.GetByIdAsync(agentId)).ReturnsAsync(agent);
-        _mockChatSessionRepository.Setup(repo => repo.GetByIdAsync(sessionId)).ReturnsAsync(session);
+        _mockAgentRepository.Setup(repo => repo.GetById(agentId)).Returns(agent);
+        _mockChatSessionRepository.Setup(repo => repo.GetById(sessionId)).Returns(session);
 
         // Act
         await _chatService.SendAgentChatMessageAsync(message);

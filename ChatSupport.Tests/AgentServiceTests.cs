@@ -44,7 +44,7 @@ public class AgentServiceTests
     {
         // Arrange
         var agentId = ObjectId.GenerateNewId();
-        _agentRepositoryMock.Setup(a => a.GetByIdAsync(agentId)).ReturnsAsync((Agent)null);
+        _agentRepositoryMock.Setup(a => a.GetById(agentId)).Returns((Agent)null);
 
         // Act & Assert
         await Assert.ThrowsAsync<AgentNotFoundException>(() => _agentService.ConnectAsync(agentId));
@@ -56,7 +56,7 @@ public class AgentServiceTests
         // Arrange
         var agentId = ObjectId.GenerateNewId();
         var agent = new Agent { IsOnline = true };
-        _agentRepositoryMock.Setup(a => a.GetByIdAsync(agentId)).ReturnsAsync(agent);
+        _agentRepositoryMock.Setup(a => a.GetById(agentId)).Returns(agent);
 
         // Act
         var result = await _agentService.ConnectAsync(agentId);
@@ -72,7 +72,7 @@ public class AgentServiceTests
         // Arrange
         var agentId = ObjectId.GenerateNewId();
         var agent = new Agent { IsOnline = false, Shift = AgentShift.Afternoon };
-        _agentRepositoryMock.Setup(a => a.GetByIdAsync(agentId)).ReturnsAsync(agent);
+        _agentRepositoryMock.Setup(a => a.GetById(agentId)).Returns(agent);
         _dateTimeProviderMock.Setup(dp => dp.Now).Returns(new DateTime(2021, 1, 1, 21, 0, 0));
 
         // Act & Assert
@@ -86,7 +86,7 @@ public class AgentServiceTests
         var agentId = ObjectId.GenerateNewId();
         var sessionId = Guid.NewGuid().ToString();
         var agent = new Agent { IsOnline = false, ActiveSessionId = sessionId };
-        _agentRepositoryMock.Setup(a => a.GetByIdAsync(agentId)).ReturnsAsync(agent);
+        _agentRepositoryMock.Setup(a => a.GetById(agentId)).Returns(agent);
 
         var modelMock = new Mock<IModel>();
         var deliveryArgs = new BasicDeliverEventArgs { DeliveryTag = 1, Body = Encoding.UTF8.GetBytes(sessionId) };
@@ -106,8 +106,8 @@ public class AgentServiceTests
         var sessionId = ObjectId.GenerateNewId();
         var agent = new Agent { IsOnline = true, ActiveSessionId = sessionId.ToString() };
         var chatSession = new ChatSession { Status = ChatSessionStatus.Completed };
-        _agentRepositoryMock.Setup(a => a.GetByIdAsync(agentId)).ReturnsAsync(agent);
-        _chatSessionRepositoryMock.Setup(c => c.GetByIdAsync(It.IsAny<ObjectId>())).ReturnsAsync(chatSession);
+        _agentRepositoryMock.Setup(a => a.GetById(agentId)).Returns(agent);
+        _chatSessionRepositoryMock.Setup(c => c.GetById(It.IsAny<ObjectId>())).Returns(chatSession);
 
         var modelMock = new Mock<IModel>();
         var deliveryArgs = new BasicDeliverEventArgs { DeliveryTag = (ulong)1, Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };
@@ -128,8 +128,8 @@ public class AgentServiceTests
         var sessionId = ObjectId.GenerateNewId();
         var agent = new Agent { IsOnline = true, ActiveSessionId = sessionId.ToString() };
         var chatSession = new ChatSession { Status = ChatSessionStatus.InProgress };
-        _agentRepositoryMock.Setup(a => a.GetByIdAsync(agentId)).ReturnsAsync(agent);
-        _chatSessionRepositoryMock.Setup(c => c.GetByIdAsync(It.IsAny<ObjectId>())).ReturnsAsync(chatSession);
+        _agentRepositoryMock.Setup(a => a.GetById(agentId)).Returns(agent);
+        _chatSessionRepositoryMock.Setup(c => c.GetById(It.IsAny<ObjectId>())).Returns(chatSession);
 
         var modelMock = new Mock<IModel>();
         var deliveryArgs = new BasicDeliverEventArgs { DeliveryTag = (ulong)1, Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };

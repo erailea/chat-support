@@ -10,230 +10,109 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace ChatSupport.Tests
+
+public class MongoRepositoryTests
 {
+    private readonly Mock<IMongoCollection<MyEntity>> _mockCollection;
+    private readonly Mock<IFindFluent<MyEntity, MyEntity>> _mockFindFluent;
+    private MongoRepository<MyEntity> _repository;
+    private readonly Mock<IAsyncCursor<MyEntity>> _mockCursor;
+    private readonly Mock<IAsyncCursorSource<MyEntity>> _mockCursorSource;
+    private readonly Mock<IMongoDatabase> _mockDatabase;
 
-    public class MongoRepositoryTests
+
+    public MongoRepositoryTests()
     {
-        private readonly Mock<IMongoCollection<TestEntity>> _mockCollection;
-        private readonly TestMongoRepository _repository;
+        _mockCollection = new Mock<IMongoCollection<MyEntity>>();
+        _mockFindFluent = new Mock<IFindFluent<MyEntity, MyEntity>>();
+        _mockCursor = new Mock<IAsyncCursor<MyEntity>>();
+        _mockCursorSource = new Mock<IAsyncCursorSource<MyEntity>>();
+        _mockDatabase = new Mock<IMongoDatabase>();
 
-        public MongoRepositoryTests()
-        {
-            var mockDatabase = new Mock<IMongoDatabase>();
-            _mockCollection = new Mock<IMongoCollection<TestEntity>>();
-            mockDatabase.Setup(db => db.GetCollection<TestEntity>(It.IsAny<string>(), null))
-                        .Returns(_mockCollection.Object);
+        _mockDatabase.Setup(d => d.GetCollection<MyEntity>(
+            It.IsAny<string>(),
+            (MongoCollectionSettings)null))
+        .Returns(_mockCollection.Object);
 
-            _repository = new TestMongoRepository(mockDatabase.Object);
-        }
-
-        [Fact]
-        public async Task AddAsync_ShouldInsertEntity()
-        {
-            var entity = new TestEntity { Id = ObjectId.GenerateNewId(), Name = "Test" };
-
-            await _repository.AddAsync(entity);
-
-            _mockCollection.Verify(c => c.InsertOneAsync(entity, null, default), Times.Once);
-        }
-        /*
-                [Fact]
-                public async Task GetAllAsync_ShouldReturnAllEntities()
-                {
-                    var entities = new List<TestEntity>
-                {
-                    new TestEntity { Id = ObjectId.GenerateNewId(), Name = "Test1" },
-                    new TestEntity { Id = ObjectId.GenerateNewId(), Name = "Test2" }
-                };
-
-                    _mockCollection.Setup(c => c.Find(
-                            It.IsAny<FilterDefinition<TestEntity>>(),
-                            default(FindOptions)
-                            )
-                        )
-                        .Returns(new FakeFindFluent<TestEntity, TestEntity>(entities));
-
-                    var result = await _repository.GetAllAsync();
-
-                    Assert.Equal(entities.Count, result.Count);
-                }
-
-                [Fact]
-                public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
-                {
-                    var entityId = ObjectId.GenerateNewId();
-                    var entity = new TestEntity { Id = entityId, Name = "TestEntity" };
-
-                    _mockCollection.Setup(c => c.Find(Builders<TestEntity>.Filter.Eq("_id", entityId), null))
-                                   .Returns(new FakeFindFluent<TestEntity, TestEntity>(new List<TestEntity> { entity }));
-
-                    var result = await _repository.GetByIdAsync(entityId);
-
-                    Assert.Equal(entityId, result.Id);
-                }
-
-                [Fact]
-                public async Task UpdateAsync_ShouldUpdateEntity()
-                {
-                    var entityId = ObjectId.GenerateNewId();
-                    var entity = new TestEntity { Id = entityId, Name = "Updated Test" };
-
-                    await _repository.UpdateAsync(entityId, entity);
-
-                    _mockCollection.Verify(c => c.ReplaceOneAsync(
-                        Builders<TestEntity>.Filter.Eq("_id", entityId),
-                        entity,
-                        default(ReplaceOptions),
-                        default(CancellationToken)),
-                        Times.Once);
-                }
-
-                [Fact]
-                public async Task DeleteAsync_ShouldDeleteEntity()
-                {
-                    var entityId = ObjectId.GenerateNewId();
-
-                    await _repository.DeleteAsync(entityId);
-
-                    _mockCollection.Verify(c => c.DeleteOneAsync(
-                        Builders<TestEntity>.Filter.Eq("_id", entityId),
-                        It.IsAny<CancellationToken>()),
-                        Times.Once);
-                }*/
-
-        [Fact]
-        public async Task CountAsync_ShouldReturnCountOfEntities()
-        {
-            _mockCollection.Setup(c => c.CountDocumentsAsync(It.IsAny<FilterDefinition<TestEntity>>(), null, default))
-                           .ReturnsAsync(2);
-
-            var count = await _repository.CountAsync();
-
-            Assert.Equal(2, count);
-        }
-
-        [Fact]
-        public async Task DeleteAllAsync_ShouldDeleteAllEntities()
-        {
-            await _repository.DeleteAllAsync();
-
-            _mockCollection.Verify(c => c.DeleteManyAsync(It.IsAny<FilterDefinition<TestEntity>>(), default), Times.Once);
-        }
-
+        _repository = new MongoRepository<MyEntity>(_mockDatabase.Object);
     }
 
-    [CollectionName("test_collection")]
-    public class TestEntity
+    [Fact]
+    public async Task GetAll_Should_Return_List_Of_Entities()
     {
-        public ObjectId Id { get; set; }
-        public string Name { get; set; }
-    }
+        // Arrange
+        var entities = new List<MyEntity> { new MyEntity { Name = "Entity1" }, new MyEntity { Name = "Entity2" } };
 
-    public class TestMongoRepository : MongoRepository<TestEntity>
+        _mockCursor.SetupSequence(_async => _async.MoveNext(default)).Returns(true).Returns(false);
 
-    {
-        public TestMongoRepository(IMongoDatabase database) : base(database) { }
-    }
+        _mockCursor.SetupGet(_async => _async.Current).Returns(entities);
 
-    public class FakeFindFluent<TEntity, TProjection> : IFindFluent<TEntity, TEntity>
-    {
-        private readonly IEnumerable<TEntity> _items;
+        _mockCollection.Setup(c => c.FindSync(
+            Builders<MyEntity>.Filter.Empty,
+            It.IsAny<FindOptions<MyEntity>>(),
+            default))
+        .Returns(_mockCursor.Object);
 
-        public FakeFindFluent(IEnumerable<TEntity> items)
-        {
-            _items = items ?? Enumerable.Empty<TEntity>();
-        }
 
-        public FilterDefinition<TEntity> Filter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        // Act
+        var result = _repository.GetAll();
 
-        public FindOptions<TEntity, TEntity> Options => throw new NotImplementedException();
-
-        public IFindFluent<TEntity, TResult> As<TResult>(MongoDB.Bson.Serialization.IBsonSerializer<TResult> resultSerializer = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long Count(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<long> CountAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long CountDocuments(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<long> CountDocumentsAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IFindFluent<TEntity, TEntity> Limit(int? limit)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IFindFluent<TEntity, TNewProjection> Project<TNewProjection>(ProjectionDefinition<TEntity, TNewProjection> projection)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IFindFluent<TEntity, TEntity> Skip(int? skip)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IFindFluent<TEntity, TEntity> Sort(SortDefinition<TEntity> sort)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IAsyncCursor<TEntity> ToCursor(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IAsyncCursor<TEntity>> ToCursorAsync(CancellationToken cancellationToken = default)
-        {
-            IAsyncCursor<TEntity> cursor = new FakeAsyncCursor<TEntity>(_items);
-            var task = Task.FromResult(cursor);
-
-            return task;
-        }
+        // Assert
+        Assert.Equal(entities, result);
     }
 
 
-    public class FakeAsyncCursor<TEntity> : IAsyncCursor<TEntity>
+    [Fact]
+    public async Task DeleteAllAsync_ShouldDeleteAllEntities()
     {
-        private IEnumerable<TEntity> items;
+        await _repository.DeleteAllAsync();
 
-        public FakeAsyncCursor(IEnumerable<TEntity> items)
-        {
-            this.items = items;
-        }
-
-        public IEnumerable<TEntity> Current => items;
-
-        public void Dispose()
-        {
-            //throw new NotImplementedException();
-        }
-
-        public bool MoveNext(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> MoveNextAsync(CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(false);
-        }
+        _mockCollection.Verify(c => c.DeleteManyAsync(It.IsAny<FilterDefinition<MyEntity>>(), default), Times.Once);
     }
 
+    [Fact]
+    public async Task CountAsync_ShouldReturnCountOfEntities()
+    {
+        _mockCollection.Setup(c => c.CountDocumentsAsync(It.IsAny<FilterDefinition<MyEntity>>(), null, default))
+                       .ReturnsAsync(2);
+
+        var count = await _repository.CountAsync();
+
+        Assert.Equal(2, count);
+    }
+
+
+    [Fact]
+    public async Task AddAsync_ShouldInsertEntity()
+    {
+        var entity = new MyEntity { Name = "Test" };
+
+        await _repository.AddAsync(entity);
+
+        _mockCollection.Verify(c => c.InsertOneAsync(entity, null, default), Times.Once);
+    }
 }
+
+
+public class MyRepository
+{
+    private readonly IMongoCollection<MyEntity> _collection;
+
+    public MyRepository(IMongoCollection<MyEntity> collection)
+    {
+        _collection = collection;
+    }
+
+    public async Task<IList<MyEntity>> GetAll()
+    {
+        return await _collection.Find(new BsonDocument()).ToListAsync();
+    }
+}
+
+[CollectionName("test_collection")]
+public class MyEntity
+{
+    public string Name { get; set; }
+}
+
+

@@ -36,7 +36,7 @@ namespace ChatSupport.Services
 
         public async Task<Agent> ConnectAsync(ObjectId agentId)
         {
-            var agent = await _agentRepository.GetByIdAsync(agentId);
+            var agent = _agentRepository.GetById(agentId);
             if (agent == null)
             {
                 throw new AgentNotFoundException(agentId.ToString());
@@ -78,7 +78,7 @@ namespace ChatSupport.Services
             try
             {
                 //check if agent is online and free
-                var consumerAgent = await _agentRepository.GetByIdAsync(agentId);
+                var consumerAgent = _agentRepository.GetById(agentId);
 
                 if (!consumerAgent.IsOnline || consumerAgent.ActiveSessionId != sessionId)
                 {
@@ -92,7 +92,7 @@ namespace ChatSupport.Services
                 _rabbitMqService.AddConsumer("chat_queue_" + sessionId, async (chatModel, chatEa) => await HandleChatQueueMessageAsync((IModel)chatModel, chatEa)
                 );
 
-                var session = await _chatSessionRepository.GetByIdAsync(new ObjectId(sessionId));
+                var session = _chatSessionRepository.GetById(new ObjectId(sessionId));
 
                 if (session.Status == ChatSessionStatus.Completed)
                 {

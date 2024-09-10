@@ -35,8 +35,8 @@ public class AgentChatCoordinatorServiceTests
             AssignedSessions = new List<string> { "test1", "test2" },
         };
 
-        _mockAgentRepository.Setup(repo => repo.GetAllAsync())
-            .ReturnsAsync(new List<Agent> { agent1, agent2 });
+        _mockAgentRepository.Setup(repo => repo.GetAll())
+            .Returns(new List<Agent> { agent1, agent2 });
 
         // Act
         var availableAgentId = await _service.GetAvailableAgent();
@@ -44,7 +44,7 @@ public class AgentChatCoordinatorServiceTests
         // Assert
         Assert.NotNull(availableAgentId);
         Assert.Equal(agent1.Id, availableAgentId);
-        _mockAgentRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+        _mockAgentRepository.Verify(repo => repo.GetAll(), Times.Once);
     }
 
     [Fact]
@@ -67,15 +67,15 @@ public class AgentChatCoordinatorServiceTests
             AssignedSessions = new List<string>(),
         };
 
-        _mockAgentRepository.Setup(repo => repo.GetAllAsync())
-            .ReturnsAsync(new List<Agent> { agent1, agent2 });
+        _mockAgentRepository.Setup(repo => repo.GetAll())
+            .Returns(new List<Agent> { agent1, agent2 });
 
         // Act
         var availableAgentId = await _service.GetAvailableAgent();
 
         // Assert
         Assert.Null(availableAgentId);
-        _mockAgentRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+        _mockAgentRepository.Verify(repo => repo.GetAll(), Times.Once);
     }
 
     [Fact]
@@ -98,14 +98,14 @@ public class AgentChatCoordinatorServiceTests
             AssignedSessions = new List<string>(),
         };
 
-        _mockAgentRepository.Setup(repo => repo.GetAllAsync())
-            .ReturnsAsync(new List<Agent> { agent1, agent2 });
+        _mockAgentRepository.Setup(repo => repo.GetAll())
+            .Returns(new List<Agent> { agent1, agent2 });
 
         // Act
         var availableAgentId = await _service.GetAvailableAgent();
 
         // Assert
         Assert.Null(availableAgentId);
-        _mockAgentRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+        _mockAgentRepository.Verify(repo => repo.GetAll(), Times.Once);
     }
 }

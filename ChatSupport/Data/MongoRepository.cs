@@ -26,14 +26,14 @@ namespace ChatSupport.Data
             _collection = database.GetCollection<T>(collectionName);
         }
 
-        public async Task<IList<T>> GetAllAsync()
+        public IList<T> GetAll()
         {
-            return await _collection.Find(new BsonDocument()).ToListAsync();
+            return _collection.Find(Builders<T>.Filter.Empty).ToList();
         }
 
-        public async Task<T> GetByIdAsync(ObjectId id)
+        public T GetById(ObjectId id)
         {
-            return await _collection.Find(Builders<T>.Filter.Eq("_id", id)).FirstOrDefaultAsync();
+            return _collection.Find(Builders<T>.Filter.Eq("_id", id)).FirstOrDefault();
         }
 
         public async Task<bool> ExistsAsync(ObjectId id)
@@ -41,11 +41,11 @@ namespace ChatSupport.Data
             return await _collection.Find(Builders<T>.Filter.Eq("_id", id)).AnyAsync();
         }
 
-        public async Task<IList<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
+        public IList<T> GetAll(Expression<Func<T, bool>> predicate)
         {
-            return await _collection
+            return _collection
                         .Find(predicate)
-                        .ToListAsync();
+                        .ToList();
         }
 
         public T Get(Expression<Func<T, bool>> predicate)
