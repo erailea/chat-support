@@ -25,6 +25,8 @@ namespace ChatSupport.Models
         public DateTime? CompletedAt { get; set; }
         public int MissedPolls { get; set; }
 
+        public ChatSessionDto() { }
+
         public ChatSessionDto(ChatSession chatSession)
         {
             Id = chatSession.Id.ToString();

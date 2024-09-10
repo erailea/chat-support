@@ -79,7 +79,7 @@ namespace ChatSupport
 
             builder
                 .Services
-                .AddSingleton(sp =>
+                .AddSingleton<IConnectionFactory>(sp =>
                 {
                     var options =
                         sp

@@ -8,5 +8,6 @@ namespace ChatSupport.Queue.Interfaces
         void PublishMessage(string queueName, string message);
         void AddConsumer(string queueName, EventHandler<BasicDeliverEventArgs> received);
         void RemoveQueue(string queueName);
+        Task HandleRecievedSessionQueueMessage(BasicDeliverEventArgs ea);
     }
 }

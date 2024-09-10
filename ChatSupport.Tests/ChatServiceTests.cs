@@ -5,9 +5,6 @@ using ChatSupport.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MongoDB.Bson;
-using System;
-using System.Threading.Tasks;
-using Xunit;
 
 public class ChatServiceTests
 {

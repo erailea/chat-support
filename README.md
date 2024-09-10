@@ -36,12 +36,12 @@
 1. **Run Tests and Collect Coverage**
 
     ```bash
-    dotnet test ChatSupport.Tests/ChatSupport.Tests.csproj --collect:"XPlat Code Coverage"
+dotnet test --settings tests.runsettings
     ```
 
 2. **Generate Code Coverage Report**
 
     ```bash
-    reportgenerator --settings coverlet.runsettings -reports:./ChatSupport.Tests/TestResults/{{coverage guid}}/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:Html
+reportgenerator -reports:"ChatSupport.Tests/TestResults/3fa9ed6d-d098-4047-bf48-35d11dcbfbe1/coverage.cobertura.xml"     -targetdir:"coverage"   -reporttypes:Html
     ```
 
