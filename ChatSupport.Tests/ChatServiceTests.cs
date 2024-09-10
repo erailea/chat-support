@@ -95,6 +95,30 @@ public class ChatServiceTests
     }
 
     [Fact]
+    public async Task PollChatSessionAsync_ShouldDoNothing_WhenChatSessionIsNull()
+    {
+        // Arrange
+        var chatSessionId = ObjectId.GenerateNewId();
+
+        _mockChatSessionRepository.Setup(repo => repo.GetById(chatSessionId))
+            .Returns((ChatSession)null);
+
+        // Act
+        await _chatService.PollChatSessionAsync(chatSessionId);
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Pending chat session not found: {chatSessionId}")),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once
+        );
+    }
+
+    [Fact]
     public async Task SendChatMessageAsync_ShouldSendMessage_WhenSessionIsInProgress()
     {
         // Arrange
@@ -110,6 +134,31 @@ public class ChatServiceTests
 
         // Assert
         _mockRabbitMqService.Verify(r => r.PublishMessage($"chat_queue_{chatSessionId}", message.Message), Times.Once);
+    }
+
+    [Fact]
+    public async Task SendChatMessageAsync_ShouldDoNothing_WhenChatSessionIsNull()
+    {
+        // Arrange
+        var chatSessionId = ObjectId.GenerateNewId();
+        var message = new ChatMessage { ChatSessionId = chatSessionId.ToString(), Message = "Hello" };
+
+        _mockChatSessionRepository.Setup(repo => repo.GetById(chatSessionId))
+            .Returns((ChatSession)null);
+
+        // Act
+        await _chatService.SendChatMessageAsync(message);
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Active chat session not found: {chatSessionId}")),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -130,5 +179,81 @@ public class ChatServiceTests
 
         // Assert
         _mockRabbitMqService.Verify(r => r.PublishMessage($"chat_queue_{sessionId}", message.Message), Times.Once);
+    }
+
+    [Fact]
+    public async Task SendAgentChatMessageAsync_ShouldDoNothing_WhenAgentIsNull(){
+        // Arrange
+        var agentId = ObjectId.GenerateNewId();
+        var message = new ChatAgentMessage { AgentId = agentId.ToString(), Message = "Hello from agent" };
+
+        _mockAgentRepository.Setup(repo => repo.GetById(agentId)).Returns((Agent)null);
+
+        // Act
+        await _chatService.SendAgentChatMessageAsync(message);
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Agent not found or offline: {agentId}")),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once
+        );
+    }
+
+
+    [Fact]
+    public async Task SendAgentChatMessageAsync_ShouldDoNothing_WhenSessionIsNotInProgress(){
+        // Arrange
+        var agentId = ObjectId.GenerateNewId();
+        var agent = new Agent { Id = agentId, IsOnline = true, ActiveSessionId = ObjectId.GenerateNewId().ToString() };
+        var message = new ChatAgentMessage { AgentId = agentId.ToString(), Message = "Hello from agent" };
+        var sessionId = new ObjectId(agent.ActiveSessionId);
+        var session = new ChatSession { Id = sessionId, Status = ChatSessionStatus.Pending };
+
+        _mockAgentRepository.Setup(repo => repo.GetById(agentId)).Returns(agent);
+        _mockChatSessionRepository.Setup(repo => repo.GetById(sessionId)).Returns(session);
+
+        // Act
+        await _chatService.SendAgentChatMessageAsync(message);
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Chat session not in progress: {session.Id}")),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once
+        );
+    }
+
+    [Fact]
+    public async Task SendAgentChatMessageAsync_ShouldDoNothin_WhenChatSessionIsNull(){
+        // Arrange
+        var agentId = ObjectId.GenerateNewId();
+        var agent = new Agent { Id = agentId, IsOnline = true, ActiveSessionId = ObjectId.GenerateNewId().ToString() };
+        var message = new ChatAgentMessage { AgentId = agentId.ToString(), Message = "Hello from agent" };
+
+        _mockAgentRepository.Setup(repo => repo.GetById(agentId)).Returns(agent);
+        _mockChatSessionRepository.Setup(repo => repo.GetById(It.IsAny<ObjectId>())).Returns((ChatSession)null);
+
+        // Act
+        await _chatService.SendAgentChatMessageAsync(message);
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Agent session not found: {agent.ActiveSessionId}")),
+                It.IsAny<Exception>(),
+                (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once
+        );
     }
 }

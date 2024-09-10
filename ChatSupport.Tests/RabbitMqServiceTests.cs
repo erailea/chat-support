@@ -9,6 +9,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using MongoDB.Bson;
 
 public class RabbitMqServiceTests
 {
@@ -147,6 +148,41 @@ public class RabbitMqServiceTests
 
         _mockAgentRepository.Verify(r => r.UpdateAsync(availableAgentId, It.IsAny<Agent>()), Times.Once);
         _mockChatSessionRepository.Verify(r => r.UpdateAsync(sessionId, It.IsAny<ChatSession>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task HandleReceivedSessionQueueMessage_ShouldReturn_WhenAgentNotFound()
+    {
+        // Arrange
+        var sessionId = MongoDB.Bson.ObjectId.GenerateNewId();
+        var deliveryEventArgs = new BasicDeliverEventArgs { Body = Encoding.UTF8.GetBytes(sessionId.ToString()) };
+        var availableAgentId = MongoDB.Bson.ObjectId.GenerateNewId();
+
+        _mockChatSessionRepository.Setup(r => r.GetById(sessionId)).Returns(new ChatSession { Status = ChatSessionStatus.Pending });
+        _mockAgentChatCoordinatorService.Setup(s => s.GetAvailableAgent()).ReturnsAsync((ObjectId?)null);
+        _mockAgentRepository.Setup(r => r.GetById(availableAgentId)).Returns(new Agent());
+
+        // Act
+        await _service.HandleRecievedSessionQueueMessage(deliveryEventArgs);
+
+        // Assert
+        _mockLogger.Verify(l => l.Log(
+            LogLevel.Information,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Received session: {sessionId}")),
+            It.IsAny<Exception>(),
+            (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once);
+        _mockLogger.Verify(l => l.Log(
+            LogLevel.Information,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"No available agent found for session: {sessionId}")),
+            It.IsAny<Exception>(),
+            (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.Once);
+
+        _mockAgentRepository.Verify(r => r.UpdateAsync(availableAgentId, It.IsAny<Agent>()), Times.Never);
+        _mockChatSessionRepository.Verify(r => r.UpdateAsync(sessionId, It.IsAny<ChatSession>()), Times.Never);
     }
 
     [Fact]

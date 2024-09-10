@@ -13,14 +13,8 @@ namespace ChatSupport.Services
         }
         public async Task SeedData()
         {
-            if (await _agentRepository.CountAsync() == 16)
-            {
+            if (await _agentRepository.CountAsync() > 0)
                 return;
-            }
-            else
-            {
-                await _agentRepository.DeleteAllAsync();
-            }
 
             var agents = new List<Agent>
             {

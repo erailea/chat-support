@@ -70,7 +70,7 @@ namespace ChatSupport.Services
             var iModel = (IModel?)model;
             if (iModel == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(iModel));
             }
             var body = ea.Body.ToArray();
             var sessionId = Encoding.UTF8.GetString(body);

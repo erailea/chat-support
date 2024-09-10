@@ -36,29 +36,11 @@ namespace ChatSupport.Data
             return _collection.Find(Builders<T>.Filter.Eq("_id", id)).FirstOrDefault();
         }
 
-        public async Task<bool> ExistsAsync(ObjectId id)
-        {
-            return await _collection.Find(Builders<T>.Filter.Eq("_id", id)).AnyAsync();
-        }
-
         public IList<T> GetAll(Expression<Func<T, bool>> predicate)
         {
             return _collection
                         .Find(predicate)
                         .ToList();
-        }
-
-        public T Get(Expression<Func<T, bool>> predicate)
-        {
-            if (predicate == null || _collection == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            return _collection
-                        .AsQueryable<T>()
-                        .Where(predicate)
-                        .First();
         }
 
         public async Task<T> AddAsync(T entity)

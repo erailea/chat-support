@@ -98,7 +98,7 @@ namespace ChatSupport
             builder.Services.AddScoped<IAgentChatCoordinatorService, AgentChatCoordinatorService>();
             builder.Services.AddScoped<SeedService>();
             builder.Services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
+            builder.Services.AddHealthChecks();
             SeedData(builder);
 
             builder.Services.AddControllers();
@@ -115,14 +115,6 @@ namespace ChatSupport
 
             app.UseHttpsRedirection();
 
-            app
-                .MapGet("/",
-                () =>
-                {
-                    return new { Message = "App is running" };
-                })
-                .WithOpenApi();
-
             app.MapControllers();
 
             app.UseHangfireDashboard();
@@ -131,6 +123,7 @@ namespace ChatSupport
                     "monitor-chat-sessions",
                     monitor => monitor.MonitorChatSessions(),
                     "*/10 * * * * *");
+            app.MapHealthChecks("/");
 
             app.Run();
         }
