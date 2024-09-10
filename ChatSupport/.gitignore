@@ -397,11 +397,11 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-ChatSupport/bin/
-ChatSupport/obj/
-ChatSupport.Tests/bin/
-ChatSupport.Tests/obj/
+ChatSupport/bin
+ChatSupport/obj
+ChatSupport.Tests/bin
+ChatSupport.Tests/obj
 
-ChatSupport.Tests/TestResults/
+ChatSupport.Tests/TestResults
 
-coverage-report/
+coverage-report
