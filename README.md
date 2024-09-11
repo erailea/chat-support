@@ -1,5 +1,5 @@
 # ChatSupport
-
+[![Run tests](https://github.com/erailea/chat-support/actions/workflows/test.yml/badge.svg)](https://github.com/erailea/chat-support/actions/workflows/test.yml)
 ## Requirements
 
 - .NET 8
