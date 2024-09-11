@@ -1,9 +1,10 @@
 using ChatSupport.Data;
 using ChatSupport.Models;
+using ChatSupport.Services.Interfaces;
 
 namespace ChatSupport.Services
 {
-    public class SeedService
+    public class SeedService : ISeedService
     {
         private readonly IMongoRepository<Agent> _agentRepository;
         public SeedService(IMongoRepository<Agent> agentRepository)

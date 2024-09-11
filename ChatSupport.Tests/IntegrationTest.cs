@@ -1,11 +1,20 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using ChatSupport.Queue;
+using ChatSupport.Services.Interfaces;
 using FluentAssertions;
+using Hangfire;
+using Hangfire.Annotations;
+using Hangfire.Common;
+using Hangfire.Server;
+using Hangfire.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using Moq;
 using RabbitMQ.Client;
+using Hangfire.MemoryStorage;
 using Xunit;
 
 namespace ChatSupport.Tests
@@ -17,8 +26,30 @@ namespace ChatSupport.Tests
 
         public HealthCheckTests(WebApplicationFactory<ChatSupport.Program> factory)
         {
-            _factory = factory;
-            _client = factory.CreateClient();
+            Mock<IMongoDatabase> mockMongoDatabase = new Mock<IMongoDatabase>();
+            Mock<ISeedService> mockSeedService = new Mock<ISeedService>();
+            var mockBackgroundJobClient = new Mock<IBackgroundJobClient>();
+
+            mockSeedService.Setup(x => x.SeedData()).Returns(Task.CompletedTask);
+            _factory = factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.AddSingleton<IMongoDatabase>(sp =>
+                    {
+                        return mockMongoDatabase.Object;
+                    });
+                    services.AddScoped<ISeedService>(sp =>
+                    {
+                        return mockSeedService.Object;
+                    });
+                    services.AddSingleton(mockBackgroundJobClient.Object);
+                    services.AddHangfireMock();
+
+                });
+            });
+
+            _client = _factory.CreateClient();
         }
 
         [Fact]
@@ -58,4 +89,16 @@ namespace ChatSupport.Tests
     }
 
 
+    public static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddHangfireMock(this IServiceCollection services)
+        {
+            services.AddHangfire(config =>
+            {
+                config.UseMemoryStorage();
+            });
+
+            return services;
+        }
+    }
 }
