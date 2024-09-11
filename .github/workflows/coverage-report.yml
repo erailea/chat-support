@@ -43,6 +43,12 @@ jobs:
       run: |
         reportgenerator -reports:${{ env.coverage-file }} -targetdir:coverage -reporttypes:Html
 
+    - name: Generate coverage badge
+      run: |
+        COVERAGE_PERCENTAGE=$(reportgenerator -reports:${{ env.coverage-file }} -targetdir:coverage -reporttypes:TextSummary | grep -o '[0-9]*%' | head -n 1 | tr -d '%')
+        echo "Coverage: ${COVERAGE_PERCENTAGE}%"
+        echo "<svg xmlns='http://www.w3.org/2000/svg' width='100' height='20'><rect rx='3' width='100' height='20' fill='#4c1'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#fff'>Coverage: ${COVERAGE_PERCENTAGE}%</text></rect></svg>" > coverage/coverage.svg
+
     - name: Setup Pages
       if: github.ref == 'refs/heads/master'
       uses: actions/configure-pages@v3
