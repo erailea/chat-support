@@ -28,9 +28,7 @@
 
 Keep in mind that you need to have Docker and Docker Compose installed on your machine and configurations should consider rabbitmq and mongodb containers.
 
-    ```bash
     docker-compose up -d
-
 ### Running Tests and Generating Code Coverage
 
 #### Locally
