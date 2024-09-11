@@ -1,5 +1,7 @@
 # ChatSupport
 [![Run tests](https://github.com/erailea/chat-support/actions/workflows/test.yml/badge.svg)](https://github.com/erailea/chat-support/actions/workflows/test.yml)
+
+[![Coverage](https://erailea.github.io/chat-support/coverage.svg)](https://github.com/erailea/chat-support/actions/workflows/coverage-report.yml)
 ## Requirements
 
 - .NET 8
